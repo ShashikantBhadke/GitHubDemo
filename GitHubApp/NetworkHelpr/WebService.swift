@@ -63,12 +63,9 @@ class WebService {
             }
         }
         var request = URLRequest(url: _url.url!)
-        request.addValue("application/json", forHTTPHeaderField: "Accept")
-        request.addValue("token 1e9634e262b1ef8b3503969cf732a54ad3b87989", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Accept")    
+        request.addValue("1e9634e262b1ef8b3503969cf732a54ad3b87989", forHTTPHeaderField: "Authorization")
         
-        //        if let token = UserData.returnValue(for: .token) as? String {
-        //            request.addValue(token, forHTTPHeaderField: "Authorization")
-        //        }
         request.httpMethod = type.rawValue
         if type != .GET {
             request.httpBody = httpBody
@@ -114,9 +111,7 @@ class WebService {
         let boundary = generateBoundary()
         var request = URLRequest(url: url)
         let dataBody = createDataBody(withParameters: param, media: media, boundary: boundary)
-        //        if let token = UserData.returnValue(for: .token) as? String {
-        //            request.addValue(token, forHTTPHeaderField: "Authorization")
-        //        }
+        
         request.httpMethod = type.rawValue
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         
