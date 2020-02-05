@@ -14,46 +14,47 @@ struct UserListView: View {
     init(searchName: String, pushed: Binding<Bool>) {
         self.searchName = searchName
         self.objGitHub = GitHubModel(strSearch: searchName)
-        UITableView.appearance().tableFooterView = UIView()
-        UITableView.appearance().separatorStyle = .none
     }
     
     var searchName = ""
-    @State var pushToHome = false    
+    @State var pushToHome = false
     @ObservedObject var objGitHub = GitHubModel(strSearch: "")
     @Environment(\.presentationMode) var presentationMode
-    /**
-     ForEach(0..<(Int(objGitHub.gitHubUser.count / 3))) { index in
-         HStack(spacing: 20) {
-             ForEach(0..<self.getUserView(index).count) { index1 in
-                 self.getUserView(index)[index1].sheet(isPresented: self.$pushToHome) {
-                     UsersView(strName: "\(index1)")
-                 }.onTapGesture {
-                     self.pushToHome.toggle()
-                 }
-             }
-         }
-     }     
-     */
+    
+    private var stateContent: AnyView {
+        switch objGitHub.state {
+        case .loading:
+            return AnyView(
+                ActivityIndicator(style: .medium)
+            )
+        case .fetched(let result):
+            switch result {
+            case .failure(let error):
+                return AnyView(
+                    Text(error)
+                )
+            case .success( _):
+                return AnyView(
+                    List {
+                        ForEach(objGitHub.gitHubUser) { (item) in
+                            UserProfileView(intID: item.id, gitUser: item)
+                        }
+                    }
+                    .navigationBarTitle(Text(self.searchName), displayMode: .inline)
+                    .navigationBarBackButtonHidden(true)
+                    .navigationBarItems(leading:
+                        Button(action: {
+                            self.presentationMode.wrappedValue.dismiss()
+                        }, label: {
+                            Image("gh_BackArrow")
+                        }))
+                )
+            }
+        }
+    }
     
     var body: some View {
-        //ScrollView(showsIndicators: false) {
-            List {
-                ForEach(objGitHub.gitHubUser) { (item) in
-                    NavigationLink(destination: UsersView(strName: item.login ?? self.searchName)) {
-                        UserProfileView(intID: item.id, gitUser: item)
-                    }
-                }
-            }
-        .navigationBarTitle(Text(self.searchName), displayMode: .inline)
-        .navigationBarBackButtonHidden(true)
-        .navigationBarItems(leading:
-            Button(action: {
-                
-                self.presentationMode.wrappedValue.dismiss()
-            }, label: {
-                Image("gh_BackArrow")
-            }))
+        stateContent
     }
     
     func getUserView(_ index: Int)->[GitHubUsers] {
@@ -73,10 +74,3 @@ struct UserListView: View {
         return arr
     }
 }
-
-
-//struct UserListView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        UserListView(pushed: false)
-//    }
-//}

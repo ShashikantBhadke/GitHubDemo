@@ -16,14 +16,13 @@ final class GitHubModel: ObservableObject {
         self.strSearch = strSearch
         if !strSearch.isEmpty {
             getData()
+        } else {
+            state = .fetched(.failure("Enter name"))
         }
     }
     
-    var strSearch = "" {
-        didSet {
-            getData()
-        }
-    }
+    var strSearch = ""
+    var state: LoadableState<[GitHubUsers]> = .loading
     @Published var gitHubUser = [GitHubUsers]()
 
     // MARK:- WebService
@@ -32,10 +31,10 @@ final class GitHubModel: ObservableObject {
             switch result {
             case .Success(let obj, _):
                 self.gitHubUser = obj.items ?? []
-                debugPrint((obj.items ?? []).count)
-            case .Error(_):
+                self.state = .fetched(.success(obj.items ?? []))
+            case .Error(let err):
                 self.gitHubUser = []
-                debugPrint(0)
+                self.state = .fetched(.failure(err))
             }
         }
     }

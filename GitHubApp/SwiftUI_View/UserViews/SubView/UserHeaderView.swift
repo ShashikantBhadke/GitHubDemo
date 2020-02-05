@@ -17,17 +17,18 @@ struct UserHeaderView: View {
     var body: some View {
         HStack(alignment: .top) {
             KFImage(URL(string: objProfile?.avatarURL ?? "https://github.com/onevcat/Kingfisher/blob/master/images/kingfisher-1.jpg?raw=true")!)
-            .resizable()
-            .frame(width: 90, height: 90)
-            .cornerRadius(8)
-            .clipped()
+                .resizable()
+                .frame(width: 90, height: 90)
+                .cornerRadius(8)
+                .clipped()
             
             VStack(alignment: .leading) {
                 Text(objProfile?.login ?? " NA ")
-                    .font(.headline)
-                Text(objProfile?.name ?? " NA ")
+                    .font(.title)
                     .lineLimit(2)
+                Text(objProfile?.name ?? " NA ")
                     .font(.subheadline)
+                    .lineLimit(2)
             }
             Spacer()
         }

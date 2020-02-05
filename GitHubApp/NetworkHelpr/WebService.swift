@@ -22,10 +22,10 @@ class WebService {
     
     //MARK:- Error's
     static let URL_ERROR = "Oops something went. Please try again!"
-    
+        
     //MARK:- Headers
     private static var header: [String: String] = [:]
-    
+    private static let GitHubKey = "ShashikantB1e9634e262b1ef8b3503969cf732a54ad3b87989"
     
     //MARK:- Variables
     private static let apiQueue = DispatchQueue(label: "com.APICalls", qos: .utility)
@@ -33,7 +33,63 @@ class WebService {
     private init(){}
     
     //MARK:- API Calls
-    class func call<T: Decodable>(withAPIType type: HTTPRequest = .GET, withAPI subUrl: SubURL, strID: String = "" , withParameters param: [String: Any] = [:], withDecodabel _decode : T.Type, complection: @escaping(ResultAPI<T>)->()){
+    class func call<T: Decodable>(withAPIType type: HTTPRequest = .GET, withAPI strURL: String, withParameters param: [String: Any] = [:], withDecodabel _decode : T.Type, complection: @escaping(ResultAPI<T>)->()) {
+        
+        var httpBody = Data()
+        
+        guard var _url = URL(string: strURL) else {
+            complection(.Error(URL_ERROR))
+            return
+        }
+        
+        do {
+            httpBody = try JSONSerialization.data(withJSONObject: param, options: [])
+        } catch let error {
+            complection(.Error(error.localizedDescription))
+            return
+        }
+        
+        var request = URLRequest(url: _url)
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        request.addValue(GitHubKey, forHTTPHeaderField: "Authorization")
+        
+        request.httpMethod = type.rawValue
+        if type != .GET {
+            request.httpBody = httpBody
+        }
+        request.timeoutInterval = 60.0
+        debugPrint("Request URL:- \(_url)")
+        debugPrint("Request With Param:- \(param)")
+        
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            DispatchQueue.main.async {
+                var statusCode = 0
+                if let httpResponse = response as? HTTPURLResponse {
+                    statusCode = httpResponse.statusCode
+                }
+                debugPrint("StatusCode:- ",statusCode)
+                guard let data = data, error == nil else {
+                    complection(.Error(error?.localizedDescription ?? URL_ERROR))
+                    return
+                }
+                do {
+                    let parsedObj = try JSONDecoder().decode(T.self, from: data)
+                    complection(.Success(parsedObj, data))
+                } catch let decodingError {
+                    do {
+                        let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                        debugPrint(json ?? [:])
+                    } catch let decodingError {
+                        debugPrint("fail to parse again", decodingError.localizedDescription)
+                    }
+                    complection(.Error(decodingError.localizedDescription))
+                    debugPrint("fail to parse again", decodingError.localizedDescription)
+                }
+            }
+        }.resume()
+    }
+    
+    class func call<T: Decodable>(withAPIType type: HTTPRequest = .GET, withAPI subUrl: SubURL, strID: String = "" , withParameters param: [String: Any] = [:], withDecodabel _decode : T.Type, complection: @escaping(ResultAPI<T>)->()) {
         var httpBody = Data()
         
         var finalPath = MAIN_URL + subUrl.rawValue
@@ -64,7 +120,7 @@ class WebService {
         }
         var request = URLRequest(url: _url.url!)
         request.addValue("application/json", forHTTPHeaderField: "Accept")    
-        request.addValue("1e9634e262b1ef8b3503969cf732a54ad3b87989", forHTTPHeaderField: "Authorization")
+        request.addValue(GitHubKey, forHTTPHeaderField: "Authorization")
         
         request.httpMethod = type.rawValue
         if type != .GET {

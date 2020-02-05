@@ -10,8 +10,10 @@ import SwiftUI
 import KingfisherSwiftUI
 
 struct UserProfileView: View {
+    
     let intID: Int
     var gitUser: GitHubUsers
+    @State var isShowProfileDetails = false
     
     var body: some View {
         HStack() {
@@ -28,6 +30,17 @@ struct UserProfileView: View {
                     .font(.subheadline)
                     .lineLimit(3)
             }
+            Spacer()
+            Button(action: {
+                self.isShowProfileDetails = true
+            }) {
+                Image("gh_Info")
+                .resizable()
+                .fixedSize()
+                .clipped()
+            }
+        }.sheet(isPresented: self.$isShowProfileDetails) {
+            UsersView(strName: self.gitUser.login ?? "")
         }
     }
 }

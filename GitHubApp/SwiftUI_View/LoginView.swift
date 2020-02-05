@@ -14,7 +14,7 @@ struct LoginView: View {
         
     @State var pushToHome = false
     @State var pushed = false
-    @State private var name: String = ""
+    @State private var name: String = "ShashikantBhadke"
     @State private var search: String = ""
     // Alert
     @State private var showingAlertTitle = ""
@@ -39,9 +39,9 @@ struct LoginView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.emailAddress)
                     Button(action: {
-                        self.search = self.name
                         if self.validated {
                             self.pushed = true
+                            self.search = self.name.trimmingCharacters(in: .whitespacesAndNewlines)
                         } else {
                             self.showingAlert = true
                         }

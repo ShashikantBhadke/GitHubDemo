@@ -20,7 +20,8 @@ struct UserSectionView: View {
     let strImg2     : String
     let strCount2   : Int
     
-    var onProfileButtonPressed: (()->())?
+    var onProfileButton1Pressed: (()->())?
+    var onProfileButton2Pressed: (()->())?
     
     // MARK:- Main Body
     var body: some View {
@@ -32,7 +33,11 @@ struct UserSectionView: View {
                             Image(self.strImg1)
                             Text(self.strTitle1)
                         }
-                        Text("\(self.strCount1)")
+                        Button(action: {
+                            self.onProfileButton1Pressed?()
+                        }) {
+                            Text("\(self.strCount1)")
+                        }.multilineTextAlignment(.center)
                     }
                     Spacer()
                     VStack {
@@ -40,20 +45,13 @@ struct UserSectionView: View {
                             Image(self.strImg2)
                             Text(self.strTitle2)
                         }
-                        Text("\(self.strCount2)")
+                        Button(action: {
+                            self.onProfileButton2Pressed?()
+                        }) {
+                            Text("\(self.strCount2)")
+                        }.multilineTextAlignment(.center)
                     }
                 }.padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
-                Button(action: {
-                    self.onProfileButtonPressed?()
-                }) {
-                    Text(self.strButton)
-                        .fontWeight(.bold)
-                        .font(.system(size: 20))
-                        .foregroundColor(Color.white)
-                        
-                }.frame(width: geometry.size.width - 40, height: 50)
-                    .background(self.clrButton)
-                .cornerRadius(8)
             }
         }
     }

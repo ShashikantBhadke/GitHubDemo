@@ -10,20 +10,29 @@ import SwiftUI
 import Combine
 import Foundation
 
+public enum Result<T, String> {
+    case success(T)
+    case failure(String)
+}
+
+enum LoadableState<T> {
+    case loading
+    case fetched(Result<T, String>)
+}
+
 final class ProfileModelClass: ObservableObject {
 
     required init(strSearch: String) {
         self.strSearch = strSearch
         if !strSearch.isEmpty {
             userWhose()
+        } else {
+            state = .fetched(.failure("Enter name"))
         }
     }
     
-    var strSearch = "" {
-        didSet {
-            userWhose()
-        }
-    }
+    var strSearch = ""
+    var state: LoadableState<ProfileModel> = .loading    
     @Published var profileObj: ProfileModel? = nil
 
     // MARK:- WebService
@@ -31,8 +40,10 @@ final class ProfileModelClass: ObservableObject {
         WebService.call(withAPIType: .GET, withAPI: .usersName, strID: self.strSearch, withParameters: [:], withDecodabel: ProfileModel.self) { (result) in
             switch result {
             case .Success(let obj, _):
+                self.state = .fetched(.success(obj))
                 self.profileObj = obj
-            case .Error(_ ):
+            case .Error(let err):
+                self.state = .fetched(.failure(err))
                 self.profileObj = nil
             }
         }
